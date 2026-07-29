@@ -1,15 +1,19 @@
 [project]
 name = "transcription-utility"
-version = "0.1.0"
-description = "Multi-model audio transcription CLI and Python package"
+version = "0.3.0"
+description = "Audio transcription: CLI, batch jobs, and an OpenAI-compatible API"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "click>=8.1",
-    "ffmpeg-python>=0.2",
 ]
 
 [project.optional-dependencies]
+server = [
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+    "python-multipart>=0.0.9",
+]
 qwen = [
     "qwen-asr[vllm]>=0.0.6",
     "setuptools<=80.10.2",
@@ -22,7 +26,7 @@ omnilingual = [
     "omnilingual-asr>=0.1",
 ]
 all = [
-    "transcription-utility[qwen,whisper,omnilingual]",
+    "transcription-utility[server,qwen,whisper,omnilingual]",
 ]
 
 [project.scripts]

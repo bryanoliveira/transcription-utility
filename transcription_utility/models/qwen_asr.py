@@ -1,6 +1,6 @@
 """Qwen3-ASR backend (vLLM-based)."""
 from __future__ import annotations
-from . import BaseTranscriber
+from . import BaseTranscriber, free_gpu_memory
 
 MODEL_IDS = {
     "qwen3-0.6b": "Qwen/Qwen3-ASR-0.6B",
@@ -58,5 +58,5 @@ class QwenTranscriber(BaseTranscriber):
         return [r.text if hasattr(r, "text") else str(r) for r in results]
 
     def unload(self) -> None:
-        del self._model
         self._model = None
+        free_gpu_memory()

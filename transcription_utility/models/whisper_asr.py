@@ -1,6 +1,6 @@
 """OpenAI Whisper backend."""
 from __future__ import annotations
-from . import BaseTranscriber
+from . import BaseTranscriber, free_gpu_memory
 
 MODEL_IDS = {
     "whisper-tiny": "tiny",
@@ -16,6 +16,10 @@ MODEL_IDS = {
 
 class WhisperTranscriber(BaseTranscriber):
     """Transcription backend using OpenAI Whisper."""
+
+    # Whisper decodes one file at a time anyway, so batching buys nothing and
+    # a batch of 1 gives per-chunk flushing for free.
+    default_batch_size = 1
 
     def __init__(self, model_name: str = "whisper-large-v3", device: str = "cuda"):
         self.model_name = model_name
@@ -37,5 +41,5 @@ class WhisperTranscriber(BaseTranscriber):
         return results
 
     def unload(self) -> None:
-        del self._model
         self._model = None
+        free_gpu_memory()

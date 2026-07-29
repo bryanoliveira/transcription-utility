@@ -1,7 +1,14 @@
 """
-transcription_utility — Multi-model audio transcription package.
+transcription_utility — audio in, transcription out. CLI, batch, or HTTP service.
 """
-from .pipeline import TranscriptionPipeline
+from .engine import TranscriptionEngine
+from .pipeline import BatchPipeline, transcribe_audio
+from .registry import get_transcriber
 
-__all__ = ["TranscriptionPipeline"]
-__version__ = "0.1.0"
+__all__ = [
+    "TranscriptionEngine",
+    "BatchPipeline",
+    "transcribe_audio",
+    "get_transcriber",
+]
+__version__ = "0.3.0"

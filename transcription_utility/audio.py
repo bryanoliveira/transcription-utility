@@ -2,14 +2,43 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 
 AUDIO_EXTENSIONS: set[str] = {
     ".m4a", ".wav", ".mp3", ".flac", ".ogg", ".opus", ".wma", ".aac", ".mp4", ".mov", ".mkv"
 }
+
+CHUNK_DIR_PREFIX = "transcription-utility-"
+STALE_CHUNK_DIR_AGE = 4 * 60 * 60  # seconds
+
+
+def make_chunk_dir() -> str:
+    """Create a temp directory for audio chunks, tagged so it can be swept."""
+    return tempfile.mkdtemp(prefix=CHUNK_DIR_PREFIX)
+
+
+def sweep_stale_chunk_dirs(max_age: float = STALE_CHUNK_DIR_AGE) -> int:
+    """
+    Delete chunk directories abandoned by a previous run.
+
+    Nothing runs on SIGKILL, so an OOM kill or SLURM preemption always leaks
+    the chunks of the file in flight. Sweeping at startup is the only way to
+    reclaim them; the age check keeps it safe when runs overlap.
+    """
+    removed = 0
+    for path in Path(tempfile.gettempdir()).glob(f"{CHUNK_DIR_PREFIX}*"):
+        try:
+            if path.is_dir() and time.time() - path.stat().st_mtime > max_age:
+                shutil.rmtree(path, ignore_errors=True)
+                removed += 1
+        except OSError:
+            pass
+    return removed
 
 
 def get_duration(audio_path: Path | str) -> float | None:
